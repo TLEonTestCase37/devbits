@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Competitive Programming Platform
 
-## Getting Started
+This is a comprehensive competitive programming platform designed to help users improve their coding skills, practice problems, and engage in contests.
 
-First, run the development server:
+### Features Implemented
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- User authentication with email login
+- Problem submission and verification system
+- Personal statistics tracking
+- Weak topics analysis with graphical representation
+- Custom contest creation
+- Friend system and profile viewing
+- Problem set browsing with sorting capabilities
+- Practice mode for skill improvement
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Hosted Link
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+[DevBits Platform](https://devbits-iota.vercel.app/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Technologies Used
 
-## Learn More
+- React.js (Frontend)
+- Next.js (React framework)
+- Firebase (Authentication and Database)
+- CSS Modules (Styling)
 
-To learn more about Next.js, take a look at the following resources:
+### Key Components
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Based on the project structure visible in the image:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `Leaderboard.jsx`: Displays user rankings
+- `ProblemsetPage.jsx`: Shows available coding problems
+- `ProfileCompo.jsx`: User profile component
+- `sidebar.jsx`: Navigation sidebar
+- Custom contest management
+- Friend system implementation
+- Practice mode
 
-## Deploy on Vercel
+### Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run the development server: `npm run dev`
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### How It Works
+
+1. Users log in with their email ID
+2. To verify their account, users must submit an incorrect answer to a given problem
+3. Once verified, users can:
+   - Check their statistics
+   - View graphs of their weak topics
+   - Practice coding problems
+   - Create custom contests
+   - Add friends and view their profiles
+   - Browse and sort the problem set
