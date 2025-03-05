@@ -2,22 +2,40 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import Sidebar from "../components/sidebar";
+import ProfileComponent from "../components/ProfileComponent";
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [searchHandle, setSearchHandle] = useState("");
   const [searchResult, setSearchResult] = useState(null);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [userCfHandle, setUserCfHandle] = useState("");
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       fetchFriends();
+      fetchUserCfHandle();
     }
   }, [user]);
+
+  const fetchUserCfHandle = async () => {
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      setUserCfHandle(userDoc.data().cfId);
+    }
+  };
 
   const fetchFriends = async () => {
     const friendsDoc = await getDoc(doc(db, "friends", user.uid));
@@ -48,6 +66,18 @@ export default function FriendsPage() {
 
   const addFriend = async () => {
     if (searchResult) {
+      // Check if the user is trying to add themselves
+      if (searchResult.handle === userCfHandle) {
+        alert("You cannot add yourself as a friend.");
+        return;
+      }
+
+      // Check if the friend is already in the list
+      if (friends.includes(searchResult.handle)) {
+        alert("This user is already in your friend list.");
+        return;
+      }
+
       await updateDoc(doc(db, "friends", user.uid), {
         friendList: arrayUnion(searchResult.handle),
       });
@@ -63,7 +93,10 @@ export default function FriendsPage() {
       await updateDoc(doc(db, "friends", user.uid), {
         friendList: arrayRemove(friendHandle),
       });
-      setFriends(friends.filter(friend => friend !== friendHandle));
+      setFriends(friends.filter((friend) => friend !== friendHandle));
+      if (selectedFriend === friendHandle) {
+        setSelectedFriend(null);
+      }
     } catch (error) {
       console.error("Error removing friend:", error);
       alert("Error removing friend");
@@ -82,19 +115,33 @@ export default function FriendsPage() {
         Add Friend
       </button>
 
-      <ul className="space-y-2">
-        {friends.map((friend, index) => (
-          <li key={index} className="bg-gray-800 p-2 rounded flex justify-between items-center">
-            <span>{friend}</span>
-            <button
-              onClick={() => removeFriend(friend)}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded"
+      <div className="flex">
+        <ul className="space-y-2 w-1/3">
+          {friends.map((friend, index) => (
+            <li
+              key={index}
+              className="bg-gray-800 p-2 rounded flex justify-between items-center"
             >
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+              <span
+                className="cursor-pointer hover:underline"
+                onClick={() => setSelectedFriend(friend)}
+              >
+                {friend}
+              </span>
+              <button
+                onClick={() => removeFriend(friend)}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="w-2/3 ml-8">
+          {selectedFriend && <ProfileComponent handle={selectedFriend} />}
+        </div>
+      </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

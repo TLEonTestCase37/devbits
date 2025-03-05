@@ -23,6 +23,7 @@ export default function Sidebar({ user }) {
           <li><Link href="/problemset" className="block py-2 px-4 hover:bg-gray-700 rounded">Problemset</Link></li>
           <li><Link href="/friends" className="block py-2 px-4 hover:bg-gray-700 rounded">Friends</Link></li>
           <li><Link href="/submissions" className="block py-2 px-4 hover:bg-gray-700 rounded">Submissions</Link></li>
+          <li><Link href="/profile" className="block py-2 px-4 hover:bg-gray-700 rounded">Profile</Link></li>
         </ul>
       </nav>
       {user && (
