@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import Sidebar from "../components/sidebar";
+import { useAuth } from "../context/AuthContext";
+
 
 export default function Problemset() {
   const [problems, setProblems] = useState([]);
@@ -22,7 +25,9 @@ export default function Problemset() {
     "geometry", "combinatorics", "two pointers", "dsu", "bitmasks", "probabilities"
   ];
 
+  const { user } = useAuth();
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const problemsResponse = await fetch("https://codeforces.com/api/problemset.problems");
@@ -93,6 +98,8 @@ export default function Problemset() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4">
+       {user && <Sidebar user={user} />}
+
       <h1 className="text-3xl font-bold mb-6">Codeforces Problemset</h1>
       
       {/* Filtering controls */}
