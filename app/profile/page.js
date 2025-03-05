@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [searchHandle, setSearchHandle] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [ratingData, setRatingData] = useState([]);
+  const [contestHistory, setContestHistory] = useState([]);
   const [isOwnProfile, setIsOwnProfile] = useState(true);
   const { user } = useAuth();
   const chartRef = useRef(null);
@@ -33,6 +34,7 @@ export default function ProfilePage() {
       const cfHandle = userSnap.data().cfId;
       await fetchUserInfo(cfHandle);
       await fetchRatingData(cfHandle);
+      await fetchContestHistory(cfHandle);
     }
   }
 
@@ -41,6 +43,7 @@ export default function ProfilePage() {
     setIsOwnProfile(false);
     await fetchUserInfo(searchHandle);
     await fetchRatingData(searchHandle);
+    await fetchContestHistory(searchHandle);
   }
 
   async function fetchUserInfo(cfId) {
@@ -71,13 +74,27 @@ export default function ProfilePage() {
     }
   }
 
+  async function fetchContestHistory(handle) {
+    try {
+      const response = await fetch(
+        `https://codeforces.com/api/user.rating?handle=${handle}`
+      );
+      const data = await response.json();
+      if (data.status === "OK") {
+        setContestHistory(data.result);
+      }
+    } catch (error) {
+      console.error("Error fetching contest history:", error);
+    }
+  }
+
   function plotRatingGraph(ratingData) {
     const ctx = document.getElementById("ratingChart");
-    
+
     if (chartRef.current) {
       chartRef.current.destroy();
     }
-    
+
     const labels = ratingData.map((entry) =>
       new Date(entry.ratingUpdateTimeSeconds * 1000).toLocaleDateString()
     );
@@ -151,7 +168,9 @@ export default function ProfilePage() {
             placeholder="Enter Codeforces handle"
             className="p-2 rounded mr-2"
           />
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded">Search</button>
+          <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+            Search
+          </button>
         </form>
 
         {userInfo && (
@@ -164,31 +183,100 @@ export default function ProfilePage() {
                   className="w-32 h-32 rounded-full border-4 border-white"
                 />
               </div>
-              <h2 className={`text-2xl font-bold mb-4 text-center ${getHandleColor(userInfo.rating)}`}>
+              <h2
+                className={`text-2xl font-bold mb-4 text-center ${getHandleColor(
+                  userInfo.rating
+                )}`}
+              >
                 {userInfo.handle}
               </h2>
               <div className="text-lg text-gray-800">
                 <p className="mb-2">
-                  Rank: <span className={`font-semibold ${getHandleColor(userInfo.rating)}`}>
+                  Rank:{" "}
+                  <span
+                    className={`font-semibold ${getHandleColor(
+                      userInfo.rating
+                    )}`}
+                  >
                     {userInfo.rank || "N/A"}
                   </span>
                 </p>
                 <p className="mb-2">
-                  Rating: <span className={`font-semibold ${getHandleColor(userInfo.rating)}`}>
+                  Rating:{" "}
+                  <span
+                    className={`font-semibold ${getHandleColor(
+                      userInfo.rating
+                    )}`}
+                  >
                     {userInfo.rating || "N/A"}
                   </span>
                 </p>
                 <p>
-                  Max Rating: <span className={`font-semibold ${getHandleColor(userInfo.maxRating)}`}>
+                  Max Rating:{" "}
+                  <span
+                    className={`font-semibold ${getHandleColor(
+                      userInfo.maxRating
+                    )}`}
+                  >
                     {userInfo.maxRating || "N/A"}
                   </span>
                 </p>
               </div>
             </div>
             <div className="w-full bg-gray-200 p-4 md:p-6 rounded-lg shadow-xl mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">Rating History</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">
+                Rating History
+              </h2>
               <div className="h-[400px]">
                 <canvas id="ratingChart" className="w-full h-full"></canvas>
+              </div>
+            </div>
+            <div className="w-full bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-white">
+                Contest History
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-700">
+                      <th className="px-4 py-2 text-white">Contest</th>
+                      <th className="px-4 py-2 text-white">Rank</th>
+                      <th className="px-4 py-2 text-white">Old Rating</th>
+                      <th className="px-4 py-2 text-white">New Rating</th>
+                      <th className="px-4 py-2 text-white">Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contestHistory.map((contest, index) => (
+                      <tr
+                        key={index}
+                        className={
+                          index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
+                        }
+                      >
+                        <td className="px-4 py-2 text-white">
+                          {contest.contestName}
+                        </td>
+                        <td className="px-4 py-2 text-white">{contest.rank}</td>
+                        <td className="px-4 py-2 text-white">
+                          {contest.oldRating}
+                        </td>
+                        <td className="px-4 py-2 text-white">
+                          {contest.newRating}
+                        </td>
+                        <td
+                          className={`px-4 py-2 ${
+                            contest.newRating > contest.oldRating
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          {contest.newRating - contest.oldRating}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

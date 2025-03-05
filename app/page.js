@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { auth, db } from "./firebase";
 import CFVerification from "./components/CFVerification";
@@ -11,6 +12,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
   const [ratingData, setRatingData] = useState([]);
+  const [contestHistory, setContestHistory] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -25,6 +27,7 @@ export default function Home() {
             if (cfId) {
               await fetchUserInfo(cfId);
               await fetchRatingData(cfId);
+              await fetchContestHistory(cfId);
             }
           }
         } catch (error) {
@@ -33,6 +36,7 @@ export default function Home() {
       } else {
         setUserInfo(null);
         setRatingData([]);
+        setContestHistory([]);
       }
     });
     return () => unsubscribe();
@@ -60,6 +64,20 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching rating data:", error);
+    }
+  }
+
+  async function fetchContestHistory(handle) {
+    try {
+      const response = await fetch(
+        `https://codeforces.com/api/user.rating?handle=${handle}`
+      );
+      const data = await response.json();
+      if (data.status === "OK") {
+        setContestHistory(data.result);
+      }
+    } catch (error) {
+      console.error("Error fetching contest history:", error);
     }
   }
 
@@ -124,6 +142,7 @@ export default function Home() {
       console.error("Logout Error:", error);
     }
   };
+
   function getHandleColor(rating) {
     if (rating >= 3000) return "text-[#FF0000]";
     if (rating >= 2600) return "text-[#FF0000]";
@@ -141,7 +160,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900 flex">
       {/* Sidebar */}
       {user && <Sidebar user={user} />}
-  
+
       {/* Main content */}
       <div className="ml-64 p-8 flex-grow">
         <h1 className="text-3xl font-bold text-white mb-8">Welcome to Codeforces Tracker</h1>
@@ -184,6 +203,39 @@ export default function Home() {
                     <canvas id="ratingChart" className="w-full h-full"></canvas>
                   </div>
                 </div>
+                <div className="w-full bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+                  <h2 className="text-2xl font-bold mb-4 text-white">Contest History</h2>
+                  <div className="overflow-x-auto">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="bg-gray-700">
+                          <th className="px-4 py-2 text-white">Contest</th>
+                          <th className="px-4 py-2 text-white">Rank</th>
+                          <th className="px-4 py-2 text-white">Old Rating</th>
+                          <th className="px-4 py-2 text-white">New Rating</th>
+                          <th className="px-4 py-2 text-white">Change</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contestHistory.map((contest, index) => (
+                          <tr key={index} className={index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"}>
+                            <td className="px-4 py-2 text-white">{contest.contestName}</td>
+                            <td className="px-4 py-2 text-white">{contest.rank}</td>
+                            <td className="px-4 py-2 text-white">{contest.oldRating}</td>
+                            <td className="px-4 py-2 text-white">{contest.newRating}</td>
+                            <td
+                              className={`px-4 py-2 ${
+                                contest.newRating > contest.oldRating ? "text-green-400" : "text-red-400"
+                              }`}
+                            >
+                              {contest.newRating - contest.oldRating}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </>
             ) : (
               <p className="text-white">Loading user info...</p>
@@ -201,5 +253,4 @@ export default function Home() {
       </div>
     </div>
   );
-  
 }

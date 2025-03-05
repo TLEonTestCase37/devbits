@@ -6,6 +6,7 @@ import Chart from "chart.js/auto";
 export default function ProfileComponent({ handle }) {
   const [userInfo, setUserInfo] = useState(null);
   const [ratingData, setRatingData] = useState([]);
+  const [contestHistory, setContestHistory] = useState([]);
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export default function ProfileComponent({ handle }) {
       const data = await response.json();
       if (data.status === "OK") {
         setRatingData(data.result);
+        setContestHistory(data.result);
         plotRatingGraph(data.result);
       }
     } catch (error) {
@@ -149,6 +151,35 @@ export default function ProfileComponent({ handle }) {
         <h2 className="text-2xl font-bold mb-4 text-gray-800">Rating History</h2>
         <div className="h-[400px]">
           <canvas id={`ratingChart-${handle}`} className="w-full h-full"></canvas>
+        </div>
+      </div>
+      <div className="w-full bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+        <h2 className="text-2xl font-bold mb-4 text-white">Contest History</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto">
+            <thead>
+              <tr className="bg-gray-700">
+                <th className="px-4 py-2 text-white">Contest</th>
+                <th className="px-4 py-2 text-white">Rank</th>
+                <th className="px-4 py-2 text-white">Old Rating</th>
+                <th className="px-4 py-2 text-white">New Rating</th>
+                <th className="px-4 py-2 text-white">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contestHistory.map((contest, index) => (
+                <tr key={index} className={index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"}>
+                  <td className="px-4 py-2 text-white">{contest.contestName}</td>
+                  <td className="px-4 py-2 text-white">{contest.rank}</td>
+                  <td className="px-4 py-2 text-white">{contest.oldRating}</td>
+                  <td className="px-4 py-2 text-white">{contest.newRating}</td>
+                  <td className={`px-4 py-2 ${contest.newRating > contest.oldRating ? "text-green-400" : "text-red-400"}`}>
+                    {contest.newRating - contest.oldRating}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
