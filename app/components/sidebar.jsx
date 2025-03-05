@@ -15,7 +15,7 @@ export default function Sidebar({ user }) {
 
   return (
     <div className="w-64 bg-gray-800 text-white p-4 flex flex-col h-screen fixed left-0 top-0">
-      <h1 className="text-2xl font-bold mb-8">Codeforces Tracker</h1>
+      <h1 className="text-2xl font-bold mb-8">LeetForce</h1>
       <nav className="flex-grow">
         <ul className="space-y-2">
           <li><Link href="/" className="block py-2 px-4 hover:bg-gray-700 rounded">Home</Link></li>

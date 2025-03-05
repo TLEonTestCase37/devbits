@@ -163,7 +163,7 @@ export default function Home() {
 
       {/* Main content */}
       <div className="ml-64 p-8 flex-grow">
-        <h1 className="text-3xl font-bold text-white mb-8">Welcome to Codeforces Tracker</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">Welcome to LeetForce</h1>
         {user ? (
           <div className="flex flex-col items-center w-full md:w-[70%]">
             {userInfo ? (
