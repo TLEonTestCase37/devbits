@@ -70,7 +70,7 @@ const CFVerification = () => {
     <div>
       <h2>Link Your Codeforces ID</h2>
       {existingCfId ? (
-        <p>Your verified CF ID: <strong>{existingCfId}</strong></p>
+        <p className="text-black">Your verified CF ID: <strong>{existingCfId}</strong></p>
       ) : (
         <>
           <input

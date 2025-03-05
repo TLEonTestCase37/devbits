@@ -26,12 +26,17 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>Welcome to Codeforces Tracker</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Welcome to Codeforces Tracker</h1>
       {user ? (
         <CFVerification />
       ) : (
-        <button onClick={handleLogin}>Please Log in</button>
+        <button 
+          onClick={handleLogin}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out"
+        >
+          Please Log in
+        </button>
       )}
     </div>
   );
