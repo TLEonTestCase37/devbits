@@ -26,21 +26,26 @@ const CFVerification = () => {
 
   const checkCFSubmission = async () => {
     if (!cfId) return alert("Please enter your Codeforces ID");
-    
+    alert(
+      "Before proceeding, please submit a wrong answer to problem 1800A on Codeforces. This is required for verification."
+    );
     setLoading(true);
-    
+
     try {
       const response = await fetch(
         `https://codeforces.com/api/user.status?handle=${cfId}&from=1&count=5`
       );
       const data = await response.json();
-      
+
       if (data.status !== "OK") {
         throw new Error("Failed to fetch submissions");
       }
 
       const wrongSubmission = data.result.find(
-        (sub) => sub.problem.contestId === 1800 && sub.problem.index === "A" && sub.verdict === "WRONG_ANSWER"
+        (sub) =>
+          sub.problem.contestId === 1800 &&
+          sub.problem.index === "A" &&
+          sub.verdict === "WRONG_ANSWER"
       );
 
       if (wrongSubmission) {
@@ -70,7 +75,9 @@ const CFVerification = () => {
     <div>
       <h2>Link Your Codeforces ID</h2>
       {existingCfId ? (
-        <p className="text-black">Your verified CF ID: <strong>{existingCfId}</strong></p>
+        <p className="text-black">
+          Your verified CF ID: <strong>{existingCfId}</strong>
+        </p>
       ) : (
         <>
           <input
