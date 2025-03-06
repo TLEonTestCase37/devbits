@@ -26,6 +26,7 @@ export default function Sidebar({ user }) {
           <li><Link href="/profile" className="block py-2 px-4 hover:bg-gray-700 rounded">Profile</Link></li>
           <li><Link href="/practice" className="block py-2 px-4 hover:bg-gray-700 rounded">Practice</Link></li>
           <li><Link href="/custom-contests" className="block py-2 px-4 hover:bg-gray-700 rounded">Custom Contests </Link></li>
+          <li><Link href="/compare" className="block py-2 px-4 hover:bg-gray-700 rounded">Compare </Link></li>
         </ul>
       </nav>
       {user && (
