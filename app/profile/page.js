@@ -1,7 +1,6 @@
-// app/profile/page.jsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useAuth } from "../context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
@@ -9,7 +8,7 @@ import Sidebar from "../components/sidebar";
 import Chart from "chart.js/auto";
 import { useSearchParams } from 'next/navigation';
 
-export default function ProfilePage() {
+function ProfileContent() {
     const [searchHandle, setSearchHandle] = useState("");
     const [userInfo, setUserInfo] = useState(null);
     const [ratingData, setRatingData] = useState([]);
@@ -178,6 +177,122 @@ export default function ProfilePage() {
     }
 
     return (
+        <div className="flex flex-col items-center w-full md:w-[70%]">
+            <div className="w-full bg-gray-100 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+                <div className="flex items-center justify-center mb-4">
+                    <img
+                        src={userInfo?.titlePhoto}
+                        alt={`${userInfo?.handle}'s profile`}
+                        className="w-32 h-32 rounded-full border-4 border-white"
+                    />
+                </div>
+                <h2
+                    className={`text-2xl font-bold mb-4 text-center ${getHandleColor(
+                        userInfo?.rating
+                    )}`}
+                >
+                    {userInfo?.handle}
+                </h2>
+                <div className="text-lg text-gray-800">
+                    <p className="mb-2">
+                        Rank:{" "}
+                        <span
+                            className={`font-semibold ${getHandleColor(
+                                userInfo?.rating
+                            )}`}
+                        >
+                            {userInfo?.rank || "N/A"}
+                        </span>
+                    </p>
+                    <p className="mb-2">
+                        Rating:{" "}
+                        <span
+                            className={`font-semibold ${getHandleColor(
+                                userInfo?.rating
+                            )}`}
+                        >
+                            {userInfo?.rating || "N/A"}
+                        </span>
+                    </p>
+                    <p>
+                        Max Rating:{" "}
+                        <span
+                            className={`font-semibold ${getHandleColor(
+                                userInfo?.maxRating
+                            )}`}
+                        >
+                            {userInfo?.maxRating || "N/A"}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div className="w-full bg-gray-200 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">
+                    Rating History
+                </h2>
+                <div className="h-[400px]">
+                    <canvas id="ratingChart" className="w-full h-full"></canvas>
+                </div>
+            </div>
+            <div className="w-full bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl mb-8">
+                <h2 className="text-2xl font-bold mb-4 text-white">
+                    Contest History
+                </h2>
+                <div className="overflow-x-auto">
+                    <table className="w-full table-auto">
+                        <thead>
+                            <tr className="bg-gray-700">
+                                <th className="px-4 py-2 text-white">Contest</th>
+                                <th className="px-4 py-2 text-white">Rank</th>
+                                <th className="px-4 py-2 text-white">Old Rating</th>
+                                <th className="px-4 py-2 text-white">New Rating</th>
+                                <th className="px-4 py-2 text-white">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {contestHistory.map((contest, index) => (
+                                <tr
+                                    key={index}
+                                    className={
+                                        index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
+                                    }
+                                >
+                                    <td className="px-4 py-2 text-white">
+                                        {contest.contestName}
+                                    </td>
+                                    <td className="px-4 py-2 text-white">{contest.rank}</td>
+                                    <td className="px-4 py-2 text-white">
+                                        {contest.oldRating}
+                                    </td>
+                                    <td className="px-4 py-2 text-white">
+                                        {contest.newRating}
+                                    </td>
+                                    <td
+                                        className={`px-4 py-2 ${contest.newRating > contest.oldRating
+                                            ? "text-green-400"
+                                            : "text-red-400"
+                                            }`}
+                                    >
+                                        {contest.newRating - contest.oldRating}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function ProfilePage() {
+    const [isOwnProfile, setIsOwnProfile] = useState(true);
+    const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const userId = searchParams.get('userId');
+    const [searchHandle, setSearchHandle] = useState("");
+
+    return (
         <div className="min-h-screen bg-gray-900 flex">
             {user && <Sidebar user={user} />}
 
@@ -185,7 +300,6 @@ export default function ProfilePage() {
                 <h1 className="text-3xl font-bold text-white mb-8">
                     {isOwnProfile ? "Your Profile" : "User Profile"}
                 </h1>
-
                 {!userId && (
                     <form onSubmit={handleSearch} className="mb-8">
                         <input
@@ -193,7 +307,7 @@ export default function ProfilePage() {
                             value={searchHandle}
                             onChange={(e) => setSearchHandle(e.target.value)}
                             placeholder="Enter Codeforces handle"
-                            className="p-2 rounded mr-2 text-black bg-white"
+                            className="p-2 rounded mr-2 text-black"
                         />
                         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
                             Search
@@ -201,114 +315,19 @@ export default function ProfilePage() {
                     </form>
                 )}
 
-                {userInfo && (
-                    <div className="flex flex-col items-center w-full md:w-[70%]">
-                        <div className="w-full bg-gray-100 p-4 md:p-6 rounded-lg shadow-xl mb-8">
-                            <div className="flex items-center justify-center mb-4">
-                                <img
-                                    src={userInfo.titlePhoto}
-                                    alt={`${userInfo.handle}'s profile`}
-                                    className="w-32 h-32 rounded-full border-4 border-white"
-                                />
-                            </div>
-                            <h2
-                                className={`text-2xl font-bold mb-4 text-center ${getHandleColor(
-                                    userInfo.rating
-                                )}`}
-                            >
-                                {userInfo.handle}
-                            </h2>
-                            <div className="text-lg text-gray-800">
-                                <p className="mb-2">
-                                    Rank:{" "}
-                                    <span
-                                        className={`font-semibold ${getHandleColor(
-                                            userInfo.rating
-                                        )}`}
-                                    >
-                                        {userInfo.rank || "N/A"}
-                                    </span>
-                                </p>
-                                <p className="mb-2">
-                                    Rating:{" "}
-                                    <span
-                                        className={`font-semibold ${getHandleColor(
-                                            userInfo.rating
-                                        )}`}
-                                    >
-                                        {userInfo.rating || "N/A"}
-                                    </span>
-                                </p>
-                                <p>
-                                    Max Rating:{" "}
-                                    <span
-                                        className={`font-semibold ${getHandleColor(
-                                            userInfo.maxRating
-                                        )}`}
-                                    >
-                                        {userInfo.maxRating || "N/A"}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="w-full bg-gray-200 p-4 md:p-6 rounded-lg shadow-xl mb-8">
-                            <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                                Rating History
-                            </h2>
-                            <div className="h-[400px]">
-                                <canvas id="ratingChart" className="w-full h-full"></canvas>
-                            </div>
-                        </div>
-                        <div className="w-full bg-gray-800 p-4 md:p-6 rounded-lg shadow-xl mb-8">
-                            <h2 className="text-2xl font-bold mb-4 text-white">
-                                Contest History
-                            </h2>
-                            <div className="overflow-x-auto">
-                                <table className="w-full table-auto">
-                                    <thead>
-                                        <tr className="bg-gray-700">
-                                            <th className="px-4 py-2 text-white">Contest</th>
-                                            <th className="px-4 py-2 text-white">Rank</th>
-                                            <th className="px-4 py-2 text-white">Old Rating</th>
-                                            <th className="px-4 py-2 text-white">New Rating</th>
-                                            <th className="px-4 py-2 text-white">Change</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {contestHistory.map((contest, index) => (
-                                            <tr
-                                                key={index}
-                                                className={
-                                                    index % 2 === 0 ? "bg-gray-800" : "bg-gray-700"
-                                                }
-                                            >
-                                                <td className="px-4 py-2 text-white">
-                                                    {contest.contestName}
-                                                </td>
-                                                <td className="px-4 py-2 text-white">{contest.rank}</td>
-                                                <td className="px-4 py-2 text-white">
-                                                    {contest.oldRating}
-                                                </td>
-                                                <td className="px-4 py-2 text-white">
-                                                    {contest.newRating}
-                                                </td>
-                                                <td
-                                                    className={`px-4 py-2 ${contest.newRating > contest.oldRating
-                                                        ? "text-green-400"
-                                                        : "text-red-400"
-                                                        }`}
-                                                >
-                                                    {contest.newRating - contest.oldRating}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <Suspense fallback={<div className="text-white">Loading profile...</div>}>
+                    <ProfileContent />
+                </Suspense>
             </div>
         </div>
     );
+
+    async function handleSearch(e) {
+        e.preventDefault();
+        setIsOwnProfile(false);
+        // await fetchUserInfo(searchHandle);
+        // await fetchRatingData(searchHandle);
+        // await fetchContestHistory(searchHandle);
+        console.log("Searched Value");
+    }
 }
