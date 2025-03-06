@@ -43,7 +43,8 @@ Based on the project structure visible in the image:
 1.  Clone the repository
 2.  Install dependencies: `npm install`
 3.  Run the development server: `npm run dev`
-4.  Open \[http://localhost:3000](http://localhost:3000) in your browser
+4.  Add your firebase's environment variables to the .env.local file
+5.  Open \[http://localhost:3000](http://localhost:3000) in your browser
 
 ### How It Works
 
